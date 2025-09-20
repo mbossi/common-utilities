@@ -2,12 +2,14 @@ package com.ia.common.utilities.helper.normalizer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.ia.common.utilities.helper.SerializerHelper;
+import lombok.NonNull;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -33,6 +35,7 @@ import java.util.function.Supplier;
 public class DefaultObjectNormalizer implements ObjectNormalizer<Serializable> {
 
     private static final String KEY_BUILDER_TEMPLATE = "%s.%s";
+    private static final BiFunction<Object, String, String> KEY_FORMATTER = (key, parentField) -> KEY_BUILDER_TEMPLATE.formatted(parentField, key.toString());
 
     @Override
     public Map<String, Object> normalize(Serializable input) {
@@ -46,20 +49,20 @@ public class DefaultObjectNormalizer implements ObjectNormalizer<Serializable> {
     }
 
 
-    private Map<String, Object> dissect(Map<String, Object> source) {
+    private Map<String, Object> dissect(@NonNull Map<String, Object> source) {
 
         final Supplier<Map<String, Object>> container = HashMap::new;
         final BiConsumer<Map<String, Object>, ObjectDetails> accumulator = (c, item) -> c.put(item.name(), item.value());
         final BiConsumer<Map<String, Object>, Map<String, Object>> combiner = Map::putAll;
         final Function<Map<String, Object>, Map<String, Object>> finisher = s -> getDetails(s, new ArrayList<>()).stream().collect(container, accumulator, combiner);
 
-        return Optional.ofNullable(source)
+        return Optional.of(source)
                 .filter(MapUtils::isNotEmpty)
                 .map(finisher)
                 .orElseGet(HashMap::new);
     }
 
-    private List<ObjectDetails> getDetails(Map<String, Object> map, List<ObjectDetails> initialList) {
+    private List<ObjectDetails> getDetails(@NonNull Map<String, Object> map, @NonNull List<ObjectDetails> initialList) {
         for (final var e : map.entrySet()) {
             final var value = e.getValue();
             if (value instanceof Map<?, ?> m) {
@@ -71,18 +74,17 @@ public class DefaultObjectNormalizer implements ObjectNormalizer<Serializable> {
         return initialList;
     }
 
-    private void processMap(String parentField, Map<String, Object> map, List<ObjectDetails> details) {
+    private void processMap(@NonNull String parentField, @NonNull Map<String, Object> map, @NonNull List<ObjectDetails> details) {
         if (MapUtils.isEmpty(map)) {
             details.add(ObjectDetails.empty(parentField));
         } else {
-            final Function<Object, String> keyFormatter = key -> KEY_BUILDER_TEMPLATE.formatted(parentField, key.toString());
             for (final var e : map.entrySet()) {
                 final var fieldName = String.format(KEY_BUILDER_TEMPLATE, parentField, e.getKey());
                 final var value = e.getValue();
                 if (value instanceof Map<?, ?> m) {
-                    processMap(keyFormatter.apply(e.getKey()), (Map<String, Object>) m, details);
+                    processMap(KEY_FORMATTER.apply(e.getKey(), parentField), (Map<String, Object>) m, details);
                 } else {
-                    details.add(new ObjectDetails(keyFormatter.apply(e.getKey()), value));
+                    details.add(new ObjectDetails(KEY_FORMATTER.apply(e.getKey(),parentField), value));
                 }
             }
         }

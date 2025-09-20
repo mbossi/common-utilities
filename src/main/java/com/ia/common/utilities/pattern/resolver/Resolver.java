@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
  * A functional interface representing a resolver that maps keys of type K to values of type V.
  * It provides a method to resolve a value based on a given key, returning an Optional<V>.
  * Additionally, it includes a default method to retrieve values from a Map using the key.
- *
+ * @author Martin Blaise Signe
  * @param <K> the type of keys used for resolution
  * @param <V> the type of values produced by the resolver
  */

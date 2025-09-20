@@ -1,12 +1,13 @@
 package com.ia.common.utilities.helper.normalizer;
 
-import com.ia.common.utilities.helper.math.ObjectHelper;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
+
+import static com.ia.common.utilities.helper.math.ObjectHelper.getMaxKeys;
+import static com.ia.common.utilities.helper.math.ObjectHelper.isEqual;
+import static java.util.stream.Collectors.toMap;
 
 /***
  * Interface for normalizing objects into a map representation.
@@ -29,14 +30,14 @@ public interface ObjectNormalizer<T> extends Normalizer<T, Map<String, Object>> 
             final var expectedMap = normalize(expected);
             record Detail(String key, ObjectDiffDetails value) {
             }
-            return expectedMap.keySet().stream()
+            return getMaxKeys(actualMap, expectedMap).stream()
                     .map(k -> {
                         final var actualValue = actualMap.get(k);
                         final var expectedValue = expectedMap.get(k);
-                        return ObjectHelper.isEqual(actualValue, expectedValue) ? null : new Detail(k, new ObjectDiffDetails(actualValue, expectedValue));
+                        return isEqual(actualValue, expectedValue) ? null : new Detail(k, new ObjectDiffDetails(actualValue, expectedValue));
                     })
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toMap(Detail::key, Detail::value));
+                    .collect(toMap(Detail::key, Detail::value));
 
         };
     }
@@ -51,7 +52,7 @@ public interface ObjectNormalizer<T> extends Normalizer<T, Map<String, Object>> 
         return (left, right) -> this.differenceExtractor().apply(left, right).entrySet()
                 .stream()
                 .filter(e -> !excludedKeys.contains(e.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     }
 

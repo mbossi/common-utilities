@@ -35,11 +35,13 @@ class DefaultObjectNormalizerTest {
         nested.put("b", "test");
         final Map<String, Object> map = new HashMap<>();
         map.put("c", nested);
-        final var normalized = normalizer.normalize((Serializable) map);
-        assertThat(normalized).containsKey("c.a");
-        assertThat(normalized).containsKey("c.b");
-        assertThat(normalized.get("c.a")).isEqualTo(1);
-        assertThat(normalized.get("c.b")).isEqualTo("test");
+        final Map<String, Object> last = new HashMap<>();
+        last.put("d", map);
+        final var normalized = normalizer.normalize((Serializable) last);
+        assertThat(normalized).containsKey("d.c.a");
+        assertThat(normalized).containsKey("d.c.b");
+        assertThat(normalized.get("d.c.a")).isEqualTo(1);
+        assertThat(normalized.get("d.c.b")).isEqualTo("test");
     }
 
     @Test

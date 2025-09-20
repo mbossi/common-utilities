@@ -3,7 +3,9 @@ package com.ia.common.utilities.helper.math;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 @UtilityClass
 public class ObjectHelper {
@@ -20,5 +22,9 @@ public class ObjectHelper {
         final Object o1 = getObject(obj1);
         final Object o2 = getObject(obj2);
         return Objects.equals(o1, o2);
+    }
+
+    public <K,V> Set<K> getMaxKeys(Map<K,V> map1, Map<K,V> map2) {
+        return map1.size() >= map2.size() ? map1.keySet() : map2.keySet();
     }
 }

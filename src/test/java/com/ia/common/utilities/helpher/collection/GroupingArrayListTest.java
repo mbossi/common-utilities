@@ -19,12 +19,12 @@ public class GroupingArrayListTest {
         assertThat(data.hasDuplicates()).isTrue();
         assertThat(data.hasUniques()).isTrue();
         assertThat(data.uniquesToList()).hasSize(6);
-        assertThat(data.duplicateToMap()).hasSize(1).containsKey("USA");
+        assertThat(data.duplicateByKey()).hasSize(1).containsKey("USA");
         assertThat(data.itemByKey()).hasSize(7);
         data.add(new Security(9L, "DEU"));
         assertThat(data.hasDuplicates()).isTrue();
-        assertThat(data.duplicateToMap()).hasSize(2).containsKey("USA").containsKey("DEU");
-        assertThat(data.singleItemByKey((n, p) -> n.securityId() > p.securityId() ? n : p).get("USA").securityId()).isEqualTo(3L);
+        assertThat(data.duplicateByKey()).hasSize(2).containsKey("USA").containsKey("DEU");
+        assertThat(data.singleItemToMap((n, p) -> n.securityId() > p.securityId() ? n : p).get("USA").securityId()).isEqualTo(3L);
     }
 
 

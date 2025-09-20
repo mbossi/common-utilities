@@ -65,7 +65,7 @@ public class GroupingArrayList<K, E> extends ArrayList<E> {
      *
      * @return a map where each key maps to a list of duplicate items
      */
-    public Map<K, List<E>> duplicateToMap() {
+    public Map<K, List<E>> duplicateByKey() {
         return getBranch(multiplePredicate).stream().collect(Collectors.groupingBy(keyProvider));
     }
 
@@ -75,7 +75,7 @@ public class GroupingArrayList<K, E> extends ArrayList<E> {
      * @return a list of duplicate items
      */
     public List<E> duplicatesToList() {
-        return duplicateToMap().values().stream().flatMap(List::stream).toList();
+        return duplicateByKey().values().stream().flatMap(List::stream).toList();
     }
 
     /***
@@ -102,7 +102,7 @@ public class GroupingArrayList<K, E> extends ArrayList<E> {
      * @param mergeFunction a function to merge duplicate items
      * @return a map where each key maps to a single item
      */
-    public Map<K, E> singleItemByKey(BinaryOperator<E> mergeFunction) {
+    public Map<K, E> singleItemToMap(BinaryOperator<E> mergeFunction) {
         return this.stream().collect(Collectors.toMap(keyProvider, Function.identity(), mergeFunction, HashMap::new));
     }
 
@@ -113,7 +113,7 @@ public class GroupingArrayList<K, E> extends ArrayList<E> {
      * @return a list of single items
      */
     public List<E> singleItemToList(BinaryOperator<E> mergeFunction) {
-        return new ArrayList<>(singleItemByKey(mergeFunction).values());
+        return new ArrayList<>(singleItemToMap(mergeFunction).values());
     }
 
     /***
